@@ -148,13 +148,13 @@ describe("useRuntimeAccel", () => {
     });
 
     act(() => {
-      result.current.editPairs(() => [{ speed: 0, factor: 99999 }]);
+      result.current.editPairs(() => [{ speed: 0, factor: 20000 }]);
     });
     await act(async () => {
       await result.current.setCurve(false);
     });
     expect(firmware.setCurveRequests).toEqual([
-      { instanceId: "pointer", points: [0, 99999], persist: false },
+      { instanceId: "pointer", points: [0, 20000], persist: false },
     ]);
     expect(result.current.lastAction).toBe("applied");
     // Reloaded after apply: the firmware clamped the factor.

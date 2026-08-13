@@ -9,6 +9,7 @@ import {
   FACTOR_MIN,
   FACTOR_MAX,
   MAX_POINTS,
+  SPEED_MAX,
 } from "../lib/accelCurve";
 
 /**
@@ -158,12 +159,16 @@ export function AccelerationPage() {
                       <input
                         type="number"
                         min={0}
+                        max={SPEED_MAX}
                         className="input-field w-24 text-sm"
                         aria-label={`point ${i} speed`}
                         value={p.speed}
                         onChange={(e) =>
                           updatePoint(i, {
-                            speed: parseInt(e.target.value) || 0,
+                            speed: Math.min(
+                              SPEED_MAX,
+                              Math.max(0, parseInt(e.target.value) || 0),
+                            ),
                           })
                         }
                       />
