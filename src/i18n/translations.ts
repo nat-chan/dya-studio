@@ -1403,6 +1403,28 @@ const ja: Record<string, string> = {
   "Saved to flash": "フラッシュに保存しました",
   "Factor is permille: 1000 = 1.0x. Speed is counts/sec. The firmware clamps factors to {{min}}..{{max}} and sorts points by speed on apply. Drag points on the chart, or double-click a point to remove it.":
     "倍率はパーミル表記です (1000 = 1.0倍)。速度は counts/sec。ファームウェアは適用時に倍率を {{min}}..{{max}} に制限し、ポイントを速度順にソートします。グラフ上のポイントはドラッグで移動、ダブルクリックで削除できます。",
+
+  // Keymap presets
+  Presets: "プリセット",
+  "Keymap Presets": "キーマッププリセット",
+  "Apply a built-in keymap. Changes are staged on the keyboard — review them, then Save or Discard from the keymap editor.":
+    "内蔵キーマップを適用します。変更はキーボードに一時適用されるので、内容を確認してからキーマップエディタの保存/破棄ボタンで確定してください。",
+  "Keyball-style (Torabo-Tsuki LP)": "Keyball 風 (とらぼつき LP)",
+  "Keyball-style layout for Torabo-Tsuki LP: mouse buttons on the home row, layer-taps for symbols, JIS-friendly punctuation.":
+    "とらぼつき LP 向けの Keyball 風レイアウト: ホームロウにマウスボタン、レイヤータップで記号、JIS 配列向けの記号配置。",
+  "{{count}} keys": "{{count}} キー",
+  "{{count}} unchanged": "{{count}} 件変更なし",
+  "{{count}} not appliable": "{{count}} 件適用不可",
+  "{{count}} layers to add": "{{count}} レイヤー追加",
+  "The keyboard does not have enough free layer slots for this preset. Missing layers are skipped.":
+    "このプリセットに必要な空きレイヤーがキーボードにありません。不足レイヤーはスキップされます。",
+  "This layer already matches the preset.":
+    "このレイヤーはすでにプリセットと一致しています。",
+  "Not appliable on this keyboard ({{reason}})":
+    "このキーボードには適用できません ({{reason}})",
+  "Preset staged: {{applied}} keys changed, {{skipped}} skipped, {{failed}} failed. Use Save to persist or Discard to revert.":
+    "プリセットを一時適用しました: {{applied}} キー変更 / {{skipped}} スキップ / {{failed}} 失敗。保存で確定、破棄で元に戻せます。",
+  "Apply Preset": "プリセットを適用",
 };
 
 const dictionaries: Record<Language, Record<string, string>> = {

@@ -21,6 +21,7 @@ import {
   IconPencil,
   IconLock,
   IconRefresh,
+  IconTemplate,
 } from "@tabler/icons-react";
 import { useStudioLockState } from "@cormoran/zmk-studio-react-hook";
 import * as Tooltip from "@radix-ui/react-tooltip";
@@ -46,6 +47,7 @@ import { ResetVersionMenu } from "../components/versionHistory/ResetVersionMenu"
 import { VersionDiffModal } from "../components/versionHistory/VersionDiffModal";
 import { useKeymapVersionHistory } from "../hooks/versionHistory/useKeymapVersionHistory";
 import { useIsTabActive } from "../hooks/useIsTabActive";
+import { KeymapPresetDialog } from "../components/KeymapPresetDialog";
 
 export function KeymapPage() {
   const { t } = useLanguage();
@@ -86,6 +88,8 @@ export function KeymapPage() {
   // Popup listing the device's deleted (restorable) layers, opened from the
   // restore button in the layer toolbar.
   const [showRestoreMenu, setShowRestoreMenu] = useState(false);
+  // Built-in keymap preset picker (diff review + staged apply).
+  const [showPresetDialog, setShowPresetDialog] = useState(false);
   const [renameValue, setRenameValue] = useState("");
   const [isRenaming, setIsRenaming] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
@@ -906,6 +910,16 @@ export function KeymapPage() {
                 </Tooltip.Provider>
               </div>
 
+              {/* Built-in keymap presets (diff review + staged apply) */}
+              <button
+                className="flex items-center gap-1.5 px-2 py-1 rounded border border-[var(--color-border)] text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-electric)] hover:border-[var(--color-electric)] transition-colors"
+                onClick={() => setShowPresetDialog(true)}
+                disabled={!keymap.keymap || keymap.isLoading}
+              >
+                <IconTemplate size={14} />
+                {t("Presets")}
+              </button>
+
               {inputStream.isEnabled && <BrowserKeyInputOverlay />}
             </div>
 
@@ -1045,6 +1059,14 @@ export function KeymapPage() {
           </p>
         </div>
       </div>
+
+      {/* Keymap Preset Dialog */}
+      <KeymapPresetDialog
+        open={showPresetDialog}
+        onOpenChange={setShowPresetDialog}
+        keymap={keymap}
+        physicalLayout={currentLayout}
+      />
 
       {/* Rename Layer Dialog */}
       <Dialog.Root

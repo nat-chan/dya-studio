@@ -176,13 +176,15 @@ const JIS_LAYOUT_MAPPINGS: KeycodeLayoutMapping[] = [
     code: 0x89,
     displayName: "￥",
   },
+  // HID International4 (0x8a) is 変換 (Henkan) and International5 (0x8b) is
+  // 無変換 (Muhenkan) — matches keycodes.ts INT_HENKAN / INT_MUHENKAN aliases.
   {
     code: 0x8a,
-    displayName: "無変換",
+    displayName: "変換",
   },
   {
     code: 0x8b,
-    displayName: "変換",
+    displayName: "無変換",
   },
 ];
 
@@ -203,13 +205,15 @@ const US_FOR_JP_LAYOUT_MAPPINGS: KeycodeLayoutMapping[] = [
     code: 0x89,
     displayName: "￥",
   },
+  // HID International4 (0x8a) is 変換 (Henkan) and International5 (0x8b) is
+  // 無変換 (Muhenkan) — matches keycodes.ts INT_HENKAN / INT_MUHENKAN aliases.
   {
     code: 0x8a,
-    displayName: "無変換",
+    displayName: "変換",
   },
   {
     code: 0x8b,
-    displayName: "変換",
+    displayName: "無変換",
   },
 ];
 
