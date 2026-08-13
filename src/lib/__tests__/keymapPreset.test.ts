@@ -7,6 +7,7 @@ import {
   resolvePresetBinding,
   zmkKeycodeToUsage,
   type PresetKeymapJson,
+  serializeZmkBinding,
 } from "../keymapPreset";
 import { KEYMAP_PRESETS } from "../../presets";
 
@@ -71,7 +72,6 @@ describe("parseZmkBinding", () => {
   });
 
   it("returns null for unknown behaviors, keycodes, or malformed params", () => {
-    expect(parseZmkBinding("&bt BT_CLR")).toBeNull();
     expect(parseZmkBinding("&kp NOPE")).toBeNull();
     expect(parseZmkBinding("&kp")).toBeNull();
     expect(parseZmkBinding("&lt x SQT")).toBeNull();
@@ -263,5 +263,44 @@ describe("bundled presets", () => {
     for (const layer of preset?.keymap.layers ?? []) {
       expect(layer.length).toBe(66);
     }
+  });
+});
+
+describe("&bt / &out round-trip (backport support)", () => {
+  const cases = [
+    "&bt BT_CLR",
+    "&bt BT_NXT",
+    "&bt BT_PRV",
+    "&bt BT_SEL 0",
+    "&bt BT_SEL 1",
+    "&bt BT_CLR_ALL",
+    "&bt BT_DISC 0",
+    "&out OUT_TOG",
+    "&out OUT_USB",
+    "&out OUT_BLE",
+  ];
+  it.each(cases)("parse→serialize identity: %s", (text) => {
+    const parsed = parseZmkBinding(text);
+    expect(parsed).not.toBeNull();
+    expect(serializeZmkBinding(parsed!)).toBe(text);
+  });
+
+  it("maps BT_SEL/BT_DISC params as (command, arg)", () => {
+    expect(parseZmkBinding("&bt BT_SEL 1")).toEqual({
+      type: "bt",
+      command: 3,
+      arg: 1,
+    });
+    expect(parseZmkBinding("&bt BT_DISC 0")).toEqual({
+      type: "bt",
+      command: 5,
+      arg: 0,
+    });
+  });
+
+  it("rejects malformed bt bindings", () => {
+    expect(parseZmkBinding("&bt BT_SEL")).toBeNull();
+    expect(parseZmkBinding("&bt BT_CLR 1")).toBeNull();
+    expect(parseZmkBinding("&bt UNKNOWN")).toBeNull();
   });
 });

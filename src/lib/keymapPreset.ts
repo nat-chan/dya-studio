@@ -195,6 +195,34 @@ export function mouseButtonsToZmkName(buttons: number): string | null {
   return ZMK_MOUSE_BUTTON_CANONICAL_NAMES.get(buttons) ?? null;
 }
 
+/** `&bt` command table (dt-bindings/zmk/bt.h). Commands with takesArg=false
+ * are spelled without the trailing arg in devicetree (the macro supplies 0). */
+const ZMK_BT_COMMANDS: Record<string, { command: number; takesArg: boolean }> =
+  {
+    BT_CLR: { command: 0, takesArg: false },
+    BT_NXT: { command: 1, takesArg: false },
+    BT_PRV: { command: 2, takesArg: false },
+    BT_SEL: { command: 3, takesArg: true },
+    BT_CLR_ALL: { command: 4, takesArg: false },
+    BT_DISC: { command: 5, takesArg: true },
+  };
+const ZMK_BT_COMMAND_NAMES = new Map(
+  Object.entries(ZMK_BT_COMMANDS).map(([name, def]) => [
+    def.command,
+    { name, takesArg: def.takesArg },
+  ]),
+);
+
+/** `&out` command table (dt-bindings/zmk/outputs.h). */
+const ZMK_OUT_COMMANDS: Record<string, number> = {
+  OUT_TOG: 0,
+  OUT_USB: 1,
+  OUT_BLE: 2,
+};
+const ZMK_OUT_COMMAND_NAMES = new Map(
+  Object.entries(ZMK_OUT_COMMANDS).map(([name, command]) => [command, name]),
+);
+
 // ---------------------------------------------------------------------------
 // Binding-string parsing
 // ---------------------------------------------------------------------------
@@ -204,6 +232,8 @@ export type ParsedBinding =
   | { type: "lt"; layerIndex: number; usage: number }
   | { type: "mt"; modUsage: number; usage: number }
   | { type: "mkp"; buttons: number }
+  | { type: "bt"; command: number; arg: number }
+  | { type: "out"; command: number }
   | { type: "trans" }
   | { type: "none" };
 
@@ -246,6 +276,24 @@ export function parseZmkBinding(text: string): ParsedBinding | null {
       const buttons = ZMK_MOUSE_BUTTONS[tokens[1].toUpperCase()];
       return buttons === undefined ? null : { type: "mkp", buttons };
     }
+    case "&bt": {
+      if (tokens.length < 2 || tokens.length > 3) return null;
+      const def = ZMK_BT_COMMANDS[tokens[1].toUpperCase()];
+      if (def === undefined) return null;
+      if (def.takesArg) {
+        if (tokens.length !== 3) return null;
+        const arg = Number.parseInt(tokens[2], 10);
+        if (!Number.isInteger(arg) || arg < 0) return null;
+        return { type: "bt", command: def.command, arg };
+      }
+      if (tokens.length !== 2) return null;
+      return { type: "bt", command: def.command, arg: 0 };
+    }
+    case "&out": {
+      if (tokens.length !== 2) return null;
+      const command = ZMK_OUT_COMMANDS[tokens[1].toUpperCase()];
+      return command === undefined ? null : { type: "out", command };
+    }
     default:
       return null;
   }
@@ -281,6 +329,17 @@ export function serializeZmkBinding(parsed: ParsedBinding): string | null {
       const name = mouseButtonsToZmkName(parsed.buttons);
       return name === null ? null : `&mkp ${name}`;
     }
+    case "bt": {
+      const def = ZMK_BT_COMMAND_NAMES.get(parsed.command);
+      if (def === undefined) return null;
+      if (def.takesArg) return `&bt ${def.name} ${parsed.arg}`;
+      // No-arg commands only round-trip with arg 0 (the macro's value).
+      return parsed.arg === 0 ? `&bt ${def.name}` : null;
+    }
+    case "out": {
+      const name = ZMK_OUT_COMMAND_NAMES.get(parsed.command);
+      return name === undefined ? null : `&out ${name}`;
+    }
   }
 }
 
@@ -294,6 +353,8 @@ const BEHAVIOR_ALIAS: Record<ParsedBinding["type"], string> = {
   lt: "lt",
   mt: "mt",
   mkp: "mkp",
+  bt: "bt",
+  out: "out",
   trans: "Trans",
   none: "None",
 };
@@ -367,6 +428,16 @@ export function resolvePresetBinding(
       return {
         ok: true,
         binding: { behaviorId, param1: parsed.buttons, param2: 0 },
+      };
+    case "bt":
+      return {
+        ok: true,
+        binding: { behaviorId, param1: parsed.command, param2: parsed.arg },
+      };
+    case "out":
+      return {
+        ok: true,
+        binding: { behaviorId, param1: parsed.command, param2: 0 },
       };
     case "trans":
     case "none":

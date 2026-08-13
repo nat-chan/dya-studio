@@ -114,11 +114,23 @@ describe("serializeDeviceKeymap", () => {
     expect(serialized.warnings).toEqual([]);
   });
 
-  it("exports unserializable bindings as &trans and reports them", () => {
+  it("serializes &bt bindings (backport of Studio-assigned BT keys)", () => {
     const behaviors = fullBehaviors();
     behaviors.set(50, behavior(50, "Bluetooth"));
     const keymap = presetAsDeviceKeymap(behaviors);
-    keymap.layers[0].bindings[0] = { behaviorId: 50, param1: 2, param2: 0 };
+    keymap.layers[0].bindings[0] = { behaviorId: 50, param1: 3, param2: 1 };
+    keymap.layers[0].bindings[1] = { behaviorId: 50, param1: 5, param2: 0 };
+    const serialized = serializeDeviceKeymap(keymap, behaviors);
+    expect(serialized.layers[0][0]).toBe("&bt BT_SEL 1");
+    expect(serialized.layers[0][1]).toBe("&bt BT_DISC 0");
+    expect(serialized.warnings).toEqual([]);
+  });
+
+  it("exports unserializable bindings as &trans and reports them", () => {
+    const behaviors = fullBehaviors();
+    behaviors.set(60, behavior(60, "Macro"));
+    const keymap = presetAsDeviceKeymap(behaviors);
+    keymap.layers[0].bindings[0] = { behaviorId: 60, param1: 0, param2: 0 };
     const serialized = serializeDeviceKeymap(keymap, behaviors);
     expect(serialized.layers[0][0]).toBe("&trans");
     expect(serialized.warnings).toEqual([
@@ -126,7 +138,7 @@ describe("serializeDeviceKeymap", () => {
         layerIndex: 0,
         layerName: "default",
         keyPosition: 0,
-        binding: "Bluetooth (2, 0)",
+        binding: "Macro (0, 0)",
       },
     ]);
   });

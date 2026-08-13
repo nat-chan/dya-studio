@@ -80,7 +80,7 @@ export function buildBehaviorTypeIndex(
 /**
  * Map one device binding into the parser's {@link ParsedBinding} form.
  * Returns null when the behavior is not one the devicetree serializer
- * understands (macros, &bt, custom behaviors, ...) or an `&lt` targets an
+ * understands (macros, custom behaviors, ...) or an `&lt` targets an
  * unknown layer id.
  */
 export function deviceBindingToParsed(
@@ -101,6 +101,10 @@ export function deviceBindingToParsed(
       return { type, modUsage: binding.param1, usage: binding.param2 };
     case "mkp":
       return { type, buttons: binding.param1 };
+    case "bt":
+      return { type, command: binding.param1, arg: binding.param2 };
+    case "out":
+      return { type, command: binding.param1 };
     case "trans":
     case "none":
       return { type };
