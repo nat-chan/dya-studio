@@ -1,0 +1,59 @@
+# Deploys the built app to this fork's GitHub Pages
+# (https://nat-chan.github.io/dya-studio/).
+#
+# The upstream repo deploys to Cloudflare Workers (test.yml / release.yml);
+# this fork additionally publishes to GitHub Pages so it needs no Cloudflare
+# credentials. Requires Pages to be enabled with "GitHub Actions" as the
+# source in the repository settings.
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# One deployment at a time; don't cancel a production deploy mid-flight.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install dependencies
+        run: npm ci
+      - name: Build
+        run: npm run build
+        env:
+          # Project pages are served under /<repo>/ — the app's routing reads
+          # this back via import.meta.env.BASE_URL (src/lib/basePath.ts).
+          VITE_BASE: /dya-studio/
+      - name: Add SPA fallback
+        # GitHub Pages has no rewrite rules; serving the app as 404.html keeps
+        # deep links like /dya-studio/keymap working.
+        run: cp dist/index.html dist/404.html
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

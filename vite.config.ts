@@ -33,6 +33,12 @@ const ZMK_STUDIO_CLIENT_ALIAS = {
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), "VITE_");
   return {
+    // URL prefix the app is served under. Root ("/") for the Cloudflare
+    // deployments; the GitHub Pages workflow builds with
+    // VITE_BASE=/dya-studio/ (see .github/workflows/deploy-pages.yml).
+    // Route handling reads it back via import.meta.env.BASE_URL
+    // (src/lib/basePath.ts).
+    base: env.VITE_BASE || "/",
     resolve: { alias: ZMK_STUDIO_CLIENT_ALIAS },
     plugins: [
       tailwindcss(),

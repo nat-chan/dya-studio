@@ -13,6 +13,7 @@ import {
 import type { MouseEvent, ReactNode } from "react";
 import { useLanguage } from "../../hooks/useLanguage";
 import { useTheme } from "../../hooks/useTheme";
+import { toUrlPath } from "../../lib/basePath";
 import type {
   DeveloperGuideLink,
   DeveloperGuideNavigationItem,
@@ -388,7 +389,7 @@ export function DeveloperGuidePage({
     event.preventDefault();
     link?.closest("details")?.removeAttribute("open");
     window.scrollTo(0, 0);
-    window.history.pushState({}, "", href);
+    window.history.pushState({}, "", toUrlPath(href));
     window.dispatchEvent(new PopStateEvent("popstate"));
   };
 

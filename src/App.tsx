@@ -1,6 +1,7 @@
 import { useContext, useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  IconChartLine,
   IconCloudUpload,
   IconHome,
   IconKeyboard,
@@ -13,6 +14,9 @@ import {
 } from "@tabler/icons-react";
 
 import { SplashScreen } from "./components/SplashScreen";
+import { AccelerationPage } from "./pages/AccelerationPage";
+import { useCustomSubsystem } from "./hooks/useCustomSubsystem";
+import { RUNTIME_ACCEL_SUBSYSTEM_IDENTIFIER } from "./hooks/useRuntimeAccel";
 import { ReleaseNotesPage, RELEASE_NOTES_PATH } from "./pages/ReleaseNotesPage";
 import { ReconnectingOverlay } from "./components/ReconnectingOverlay";
 import {
@@ -46,6 +50,7 @@ import { useUrlTab, pathnameFromTabId } from "./hooks/useUrlTab";
 import { useDevtool } from "./hooks/useDevtool";
 import { DevtoolWindow } from "./components/DevtoolWindow";
 import { trackPageView } from "./lib/analytics";
+import { appPathname, toUrlPath } from "./lib/basePath";
 import { DeveloperGuidePage } from "./components/developerGuide";
 import {
   DEVELOPER_GUIDE_PATH,
@@ -53,7 +58,10 @@ import {
   isDeveloperGuidePath,
 } from "./content/developerGuide";
 
-function getTabs(t: (key: string) => string): TabItem[] {
+function getTabs(
+  t: (key: string) => string,
+  options: { accelAvailable: boolean },
+): TabItem[] {
   return [
     {
       id: "home",
@@ -79,6 +87,20 @@ function getTabs(t: (key: string) => string): TabItem[] {
       icon: <IconPointer size={18} />,
       content: <TrackballPage />,
     },
+    // Hidden when the connected firmware lacks the nat_chan__runtime_accel
+    // subsystem — the page's only content would be a "not available" hint.
+    // A direct /acceleration link still resolves (AppContent force-includes
+    // the tab for that URL) so the hint page explains what is missing.
+    ...(options.accelAvailable
+      ? [
+          {
+            id: "acceleration",
+            label: t("Acceleration"),
+            icon: <IconChartLine size={18} />,
+            content: <AccelerationPage />,
+          },
+        ]
+      : []),
     {
       id: "connection",
       label: t("Connection"),
@@ -135,10 +157,10 @@ function App() {
  */
 function AppRouter() {
   const { language } = useLanguage();
-  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const [pathname, setPathname] = useState(() => appPathname());
 
   useEffect(() => {
-    const onPopState = () => setPathname(window.location.pathname);
+    const onPopState = () => setPathname(appPathname());
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
@@ -169,22 +191,31 @@ function AppContent() {
   const connection = useContext(ConnectionContext);
   const { t } = useLanguage();
   const [urlTab, navigateToTab] = useUrlTab();
-  const tabs = getTabs(t);
+  // Presence-only check (no codec, no RPC): hides the Acceleration tab on
+  // keyboards without the runtime-accel module. A direct /acceleration URL
+  // keeps the tab so the page can explain why the feature is unavailable.
+  const { subsystem: accelSubsystem } = useCustomSubsystem(
+    RUNTIME_ACCEL_SUBSYSTEM_IDENTIFIER,
+  );
+  const tabs = getTabs(t, {
+    accelAvailable: accelSubsystem !== null || urlTab === "acceleration",
+  });
   const { isAvailable: isDevtoolAvailable } = useDevtool();
   const [devtoolOpen, setDevtoolOpen] = useState(false);
   const activeTab = tabs.some((tab) => tab.id === urlTab) ? urlTab : "home";
 
   // The release notes page is a standalone, connection-independent route so it
   // stays reachable from the splash screen and via GitHub Release deep links.
-  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const [pathname, setPathname] = useState(() => appPathname());
   useEffect(() => {
-    const onPopState = () => setPathname(window.location.pathname);
+    const onPopState = () => setPathname(appPathname());
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
   const navigatePath = useCallback((path: string) => {
-    if (window.location.pathname !== path) {
-      window.history.pushState(null, "", path);
+    const urlPath = toUrlPath(path);
+    if (window.location.pathname !== urlPath) {
+      window.history.pushState(null, "", urlPath);
     }
     // Notify both this route state and useUrlTab's own popstate listener.
     window.dispatchEvent(new PopStateEvent("popstate"));
@@ -192,7 +223,7 @@ function AppContent() {
   // Same as navigatePath but without a history entry, so Back never returns to
   // a URL carrying a spent OAuth authorization code.
   const replacePath = useCallback((path: string) => {
-    window.history.replaceState(null, "", path);
+    window.history.replaceState(null, "", toUrlPath(path));
     window.dispatchEvent(new PopStateEvent("popstate"));
   }, []);
   const onReleaseNotes = pathname === RELEASE_NOTES_PATH;
@@ -207,9 +238,9 @@ function AppContent() {
       !onReleaseNotes &&
       !onOauthCallback &&
       urlTab !== activeTab &&
-      window.location.pathname !== "/"
+      appPathname() !== "/"
     ) {
-      window.history.replaceState(null, "", "/");
+      window.history.replaceState(null, "", toUrlPath("/"));
     }
   }, [urlTab, activeTab, onReleaseNotes, onOauthCallback]);
 

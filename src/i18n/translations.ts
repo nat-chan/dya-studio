@@ -1378,6 +1378,53 @@ const ja: Record<string, string> = {
     "Abyss との通信で問題が発生しました。",
   "Abyss is not configured for this build.":
     "このビルドには Abyss の設定がありません。",
+
+  // Acceleration (nat_chan__runtime_accel)
+  Acceleration: "加速度",
+  "Pointer Acceleration": "ポインタ加速度",
+  "Tune speed-to-factor acceleration curves of the runtime-accel input processor in real time.":
+    "runtime-accel 入力プロセッサの速度→倍率カーブをリアルタイムに調整します。",
+  "Runtime acceleration subsystem is not available for your keyboard.":
+    "このキーボードでは runtime-accel サブシステムを利用できません。",
+  "Build your firmware with the nat-chan/zmk-module-runtime-accel module to enable this feature.":
+    "この機能を有効にするには nat-chan/zmk-module-runtime-accel モジュールを組み込んだファームウェアをビルドしてください。",
+  "No runtime-accel instances in this firmware. Add zmk,input-processor-runtime-accel nodes to your devicetree.":
+    "このファームウェアには runtime-accel インスタンスがありません。devicetree に zmk,input-processor-runtime-accel ノードを追加してください。",
+  "Loading acceleration curves...": "加速度カーブを読み込み中...",
+  Instance: "インスタンス",
+  "Acceleration curve": "加速度カーブ",
+  Speed: "速度",
+  Factor: "倍率",
+  "Add Point": "ポイントを追加",
+  "Applying...": "適用中...",
+  "Apply (RAM)": "適用 (RAM)",
+  "Save to Flash": "フラッシュに保存",
+  "Applied (RAM only)": "適用しました (RAM のみ)",
+  "Saved to flash": "フラッシュに保存しました",
+  "Factor is permille: 1000 = 1.0x. Speed is counts/sec. The firmware clamps factors to {{min}}..{{max}} and sorts points by speed on apply. Drag points on the chart, or double-click a point to remove it.":
+    "倍率はパーミル表記です (1000 = 1.0倍)。速度は counts/sec。ファームウェアは適用時に倍率を {{min}}..{{max}} に制限し、ポイントを速度順にソートします。グラフ上のポイントはドラッグで移動、ダブルクリックで削除できます。",
+
+  // Keymap presets
+  Presets: "プリセット",
+  "Keymap Presets": "キーマッププリセット",
+  "Apply a built-in keymap. Changes are staged on the keyboard — review them, then Save or Discard from the keymap editor.":
+    "内蔵キーマップを適用します。変更はキーボードに一時適用されるので、内容を確認してからキーマップエディタの保存/破棄ボタンで確定してください。",
+  "Keyball-style (Torabo-Tsuki LP)": "Keyball 風 (とらぼつき LP)",
+  "Keyball-style layout for Torabo-Tsuki LP: mouse buttons on the home row, layer-taps for symbols, JIS-friendly punctuation.":
+    "とらぼつき LP 向けの Keyball 風レイアウト: ホームロウにマウスボタン、レイヤータップで記号、JIS 配列向けの記号配置。",
+  "{{count}} keys": "{{count}} キー",
+  "{{count}} unchanged": "{{count}} 件変更なし",
+  "{{count}} not appliable": "{{count}} 件適用不可",
+  "{{count}} layers to add": "{{count}} レイヤー追加",
+  "The keyboard does not have enough free layer slots for this preset. Missing layers are skipped.":
+    "このプリセットに必要な空きレイヤーがキーボードにありません。不足レイヤーはスキップされます。",
+  "This layer already matches the preset.":
+    "このレイヤーはすでにプリセットと一致しています。",
+  "Not appliable on this keyboard ({{reason}})":
+    "このキーボードには適用できません ({{reason}})",
+  "Preset staged: {{applied}} keys changed, {{skipped}} skipped, {{failed}} failed. Use Save to persist or Discard to revert.":
+    "プリセットを一時適用しました: {{applied}} キー変更 / {{skipped}} スキップ / {{failed}} 失敗。保存で確定、破棄で元に戻せます。",
+  "Apply Preset": "プリセットを適用",
 };
 
 const dictionaries: Record<Language, Record<string, string>> = {
