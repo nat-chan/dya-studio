@@ -52,6 +52,23 @@ describe("keyboardLayouts", () => {
       expect(getLayoutDisplayName(0x91, "JIS")).toBe("英数");
     });
 
+    it("should return JIS display names ported from keymap-editor's jis.js", () => {
+      // 0x31 (\): a JIS OS treats Backslash like Non-US Hash -> "]"
+      expect(getLayoutDisplayName(0x31, "JIS")).toBe("]}");
+      // 0x39 (Caps): JIS keyboards label this key 英数
+      expect(getLayoutDisplayName(0x39, "JIS")).toBe("英数");
+      // 0x32 (Non-US Hash): "]" on JIS
+      expect(getLayoutDisplayName(0x32, "JIS")).toBe("]}");
+      // 0x87 (International1): the ろ key, produces \ and _
+      expect(getLayoutDisplayName(0x87, "JIS")).toBe("\\ろ");
+      // 0x89 (International3): the ¥ key
+      expect(getLayoutDisplayName(0x89, "JIS")).toBe("￥");
+      // Shifted-symbol differences are covered by the two-character
+      // displayNames of the base keys: JIS Shift+2 = ", Shift+; = +, Shift+: = *
+      expect(getLayoutDisplayName(0x1f, "JIS")).toBe('2"');
+      expect(getLayoutDisplayName(0x33, "JIS")).toBe(";+");
+    });
+
     it("should return US_JP display names for Japanese language keycodes", () => {
       expect(getLayoutDisplayName(0x90, "US_JP")).toBe("かな");
       expect(getLayoutDisplayName(0x91, "US_JP")).toBe("英数");

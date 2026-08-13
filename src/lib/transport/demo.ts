@@ -21,6 +21,10 @@ import {
 } from "./demo-kscan-diagnostics";
 import { Pmw3610Handler, PMW3610_IDENTIFIER } from "./demo-pmw3610";
 import {
+  RuntimeAccelHandler,
+  RUNTIME_ACCEL_IDENTIFIER,
+} from "./demo-runtime-accel";
+import {
   RuntimeInputProcessorHandler,
   RUNTIME_INPUT_PROCESSOR_IDENTIFIER,
 } from "./demo-runtime-input-processor";
@@ -122,6 +126,10 @@ import {
   ErrorCode as FastKeymapErrorCode,
   LayoutDetailsMode as FastLayoutDetailsMode,
 } from "../../proto/cormoran/fast_keymap/fast_keymap";
+import {
+  Request as RuntimeAccelRequest,
+  Response as RuntimeAccelResponse,
+} from "../../proto/nat-chan/runtime-accel/runtime_accel";
 import {
   FAST_KEYMAP_IDENTIFIER,
   SETTING_EXPOSE_IDENTIFIER,
@@ -244,6 +252,7 @@ class Keyboard {
   private inputStreamHandler = new InputStreamHandler();
   private customSettingsHandler: CustomSettingsHandler;
   private osDetectionHandler = new OsDetectionHandler();
+  private runtimeAccelHandler = new RuntimeAccelHandler();
   private defaultLayerHandler: DefaultLayerHandler;
 
   // Custom subsystems registry
@@ -264,6 +273,7 @@ class Keyboard {
   private readonly DEFAULT_LAYER_SUBSYSTEM_INDEX = 14;
   private readonly FAST_KEYMAP_SUBSYSTEM_INDEX = 15;
   private readonly SETTING_EXPOSE_SUBSYSTEM_INDEX = 16;
+  private readonly RUNTIME_ACCEL_SUBSYSTEM_INDEX = 17;
 
   constructor() {
     this.customSettingsHandler = new CustomSettingsHandler(
@@ -365,6 +375,11 @@ class Keyboard {
       index: this.SETTING_EXPOSE_SUBSYSTEM_INDEX,
       identifier: SETTING_EXPOSE_IDENTIFIER,
       uiUrl: [SETTING_EXPOSE_UI_URL],
+    },
+    {
+      index: this.RUNTIME_ACCEL_SUBSYSTEM_INDEX,
+      identifier: RUNTIME_ACCEL_IDENTIFIER,
+      uiUrl: [],
     },
   ];
 
@@ -685,6 +700,15 @@ class Keyboard {
           responseData = FastKeymapResponse.encode(fastResp).finish();
         } catch (e) {
           console.error("Fast Keymap subsystem error:", e);
+        }
+      } else if (subsystemIndex === this.RUNTIME_ACCEL_SUBSYSTEM_INDEX) {
+        // Runtime Accel (nat_chan__runtime_accel acceleration curves)
+        try {
+          const accelReq = RuntimeAccelRequest.decode(data);
+          const accelResp = this.runtimeAccelHandler.process(accelReq);
+          responseData = RuntimeAccelResponse.encode(accelResp).finish();
+        } catch (e) {
+          console.error("Runtime Accel subsystem error:", e);
         }
       }
 

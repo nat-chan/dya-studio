@@ -99,10 +99,22 @@ const JIS_LAYOUT_MAPPINGS: KeycodeLayoutMapping[] = [
     aliases: ["Caret", "Tilde"],
   },
   {
+    code: 0x31,
+    displayName: "]}", // US: \| — a JIS OS treats 0x31 like Non-US Hash
+    name: "Right Bracket",
+    aliases: ["Backslash", "Right Bracket", "Close Bracket"],
+  },
+  {
+    code: 0x39,
+    displayName: "英数", // US: Caps — JIS keyboards label this key 英数 (Shift = Caps Lock)
+    name: "Eisu/Caps Lock",
+    aliases: ["Eisu", "Caps Lock", "CAPSLOCK"],
+  },
+  {
     code: 0x87,
-    displayName: "\\_", // US: None (international1)
-    name: "Backslash",
-    aliases: ["Backslash", "Underscore", "Yen Sign"],
+    displayName: "\\ろ", // US: None (international1) — the ろ key, produces \ and _
+    name: "Ro (Backslash/Underscore)",
+    aliases: ["Ro", "Backslash", "Underscore"],
   },
   /*
    * - 0x1f (2): In US shows "2", in JIS shows "2" but @ symbol position differs

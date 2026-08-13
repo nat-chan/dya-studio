@@ -1,6 +1,7 @@
 import { useContext, useCallback, useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  IconChartLine,
   IconCloudUpload,
   IconHome,
   IconKeyboard,
@@ -13,6 +14,9 @@ import {
 } from "@tabler/icons-react";
 
 import { SplashScreen } from "./components/SplashScreen";
+import { AccelerationPage } from "./pages/AccelerationPage";
+import { useCustomSubsystem } from "./hooks/useCustomSubsystem";
+import { RUNTIME_ACCEL_SUBSYSTEM_IDENTIFIER } from "./hooks/useRuntimeAccel";
 import { ReleaseNotesPage, RELEASE_NOTES_PATH } from "./pages/ReleaseNotesPage";
 import { ReconnectingOverlay } from "./components/ReconnectingOverlay";
 import {
@@ -53,7 +57,10 @@ import {
   isDeveloperGuidePath,
 } from "./content/developerGuide";
 
-function getTabs(t: (key: string) => string): TabItem[] {
+function getTabs(
+  t: (key: string) => string,
+  options: { accelAvailable: boolean },
+): TabItem[] {
   return [
     {
       id: "home",
@@ -79,6 +86,20 @@ function getTabs(t: (key: string) => string): TabItem[] {
       icon: <IconPointer size={18} />,
       content: <TrackballPage />,
     },
+    // Hidden when the connected firmware lacks the nat_chan__runtime_accel
+    // subsystem — the page's only content would be a "not available" hint.
+    // A direct /acceleration link still resolves (AppContent force-includes
+    // the tab for that URL) so the hint page explains what is missing.
+    ...(options.accelAvailable
+      ? [
+          {
+            id: "acceleration",
+            label: t("Acceleration"),
+            icon: <IconChartLine size={18} />,
+            content: <AccelerationPage />,
+          },
+        ]
+      : []),
     {
       id: "connection",
       label: t("Connection"),
@@ -169,7 +190,15 @@ function AppContent() {
   const connection = useContext(ConnectionContext);
   const { t } = useLanguage();
   const [urlTab, navigateToTab] = useUrlTab();
-  const tabs = getTabs(t);
+  // Presence-only check (no codec, no RPC): hides the Acceleration tab on
+  // keyboards without the runtime-accel module. A direct /acceleration URL
+  // keeps the tab so the page can explain why the feature is unavailable.
+  const { subsystem: accelSubsystem } = useCustomSubsystem(
+    RUNTIME_ACCEL_SUBSYSTEM_IDENTIFIER,
+  );
+  const tabs = getTabs(t, {
+    accelAvailable: accelSubsystem !== null || urlTab === "acceleration",
+  });
   const { isAvailable: isDevtoolAvailable } = useDevtool();
   const [devtoolOpen, setDevtoolOpen] = useState(false);
   const activeTab = tabs.some((tab) => tab.id === urlTab) ? urlTab : "home";

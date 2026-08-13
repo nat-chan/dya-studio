@@ -1378,6 +1378,31 @@ const ja: Record<string, string> = {
     "Abyss との通信で問題が発生しました。",
   "Abyss is not configured for this build.":
     "このビルドには Abyss の設定がありません。",
+
+  // Acceleration (nat_chan__runtime_accel)
+  Acceleration: "加速度",
+  "Pointer Acceleration": "ポインタ加速度",
+  "Tune speed-to-factor acceleration curves of the runtime-accel input processor in real time.":
+    "runtime-accel 入力プロセッサの速度→倍率カーブをリアルタイムに調整します。",
+  "Runtime acceleration subsystem is not available for your keyboard.":
+    "このキーボードでは runtime-accel サブシステムを利用できません。",
+  "Build your firmware with the nat-chan/zmk-module-runtime-accel module to enable this feature.":
+    "この機能を有効にするには nat-chan/zmk-module-runtime-accel モジュールを組み込んだファームウェアをビルドしてください。",
+  "No runtime-accel instances in this firmware. Add zmk,input-processor-runtime-accel nodes to your devicetree.":
+    "このファームウェアには runtime-accel インスタンスがありません。devicetree に zmk,input-processor-runtime-accel ノードを追加してください。",
+  "Loading acceleration curves...": "加速度カーブを読み込み中...",
+  Instance: "インスタンス",
+  "Acceleration curve": "加速度カーブ",
+  Speed: "速度",
+  Factor: "倍率",
+  "Add Point": "ポイントを追加",
+  "Applying...": "適用中...",
+  "Apply (RAM)": "適用 (RAM)",
+  "Save to Flash": "フラッシュに保存",
+  "Applied (RAM only)": "適用しました (RAM のみ)",
+  "Saved to flash": "フラッシュに保存しました",
+  "Factor is permille: 1000 = 1.0x. Speed is counts/sec. The firmware clamps factors to {{min}}..{{max}} and sorts points by speed on apply. Drag points on the chart, or double-click a point to remove it.":
+    "倍率はパーミル表記です (1000 = 1.0倍)。速度は counts/sec。ファームウェアは適用時に倍率を {{min}}..{{max}} に制限し、ポイントを速度順にソートします。グラフ上のポイントはドラッグで移動、ダブルクリックで削除できます。",
 };
 
 const dictionaries: Record<Language, Record<string, string>> = {
