@@ -55,7 +55,10 @@ jobs:
 
   deploy-dev:
     needs: build
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    # Cloudflare deployments need upstream's account secrets; forks (e.g.
+    # nat-chan/dya-studio, which deploys to GitHub Pages instead — see
+    # deploy-pages.yml) skip this job so CI stays green without them.
+    if: ${{ github.repository_owner == 'cormoran' && github.event_name == 'push' && github.ref == 'refs/heads/main' }}
     permissions:
       contents: read
     environment:
@@ -83,7 +86,8 @@ jobs:
 
   preview:
     needs: build
-    if: ${{ github.event_name == 'pull_request' }}
+    # Skipped on forks for the same reason as deploy-dev above.
+    if: ${{ github.repository_owner == 'cormoran' && github.event_name == 'pull_request' }}
     permissions:
       contents: read
       pull-requests: write
