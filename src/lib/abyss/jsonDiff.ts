@@ -41,10 +41,11 @@ function buildFiles(
   before: string,
   after: string,
   contextLines: number,
+  path: string,
 ): FileData[] {
   const patch = createTwoFilesPatch(
-    "a/keymap.json",
-    "b/keymap.json",
+    `a/${path}`,
+    `b/${path}`,
     before,
     after,
     "",
@@ -54,7 +55,7 @@ function buildFiles(
 
   return parseDiff(
     [
-      "diff --git a/keymap.json b/keymap.json",
+      `diff --git a/${path} b/${path}`,
       "index 0000000..1111111 100644",
       ...patch.split("\n").filter((line) => line !== PATCH_SEPARATOR),
     ].join("\n"),
@@ -79,13 +80,28 @@ export interface JsonDiff {
 
 /** Diffs two JSON documents, in both collapsed and expanded form. */
 export function buildJsonDiff(before: string, after: string): JsonDiff {
+  return buildTextDiff(before, after, "keymap.json");
+}
+
+/** Same as {@link buildJsonDiff} but for arbitrary text files, labeled with
+ * the given repo path (used by the firmware-backport diff preview). */
+export function buildTextDiff(
+  before: string,
+  after: string,
+  path: string,
+): JsonDiff {
   const beforeLines = countLines(before);
   const afterLines = countLines(after);
   // "Show everything" is just a context radius larger than the document.
   const expandedContext = Math.max(beforeLines, afterLines, 1);
 
-  const collapsedFiles = buildFiles(before, after, COLLAPSED_CONTEXT_LINES);
-  const expandedFiles = buildFiles(before, after, expandedContext);
+  const collapsedFiles = buildFiles(
+    before,
+    after,
+    COLLAPSED_CONTEXT_LINES,
+    path,
+  );
+  const expandedFiles = buildFiles(before, after, expandedContext, path);
   const hasChanges = collapsedFiles.some((file) => file.hunks.length > 0);
 
   const collapsedLines = collapsedFiles.reduce(

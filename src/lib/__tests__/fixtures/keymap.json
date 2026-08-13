@@ -1,0 +1,38 @@
+{
+  "keyboard": "torabo_tsuki_lp",
+  "keymap": "torabo_tsuki_lp",
+  "layout": "LAYOUT",
+  "layer_names": [
+    "default",
+    "mouse",
+    "fn",
+    "scroll"
+  ],
+  "layers": [
+    [
+         "&kp ESC",    "&kp N1",   "&kp N2",   "&kp N3",   "&kp N4",      "&kp N5",                                                  "&kp N6", "&kp N7",    "&kp N8",   "&kp N9",               "&kp N0",           "&kp MINUS",
+         "&kp TAB",     "&kp Q",    "&kp W",    "&kp E",    "&kp R",       "&kp T",                                                   "&kp Y",  "&kp U",     "&kp I",    "&kp O",                "&kp P",    "&kp LEFT_BRACKET",
+       "&kp LCTRL",     "&kp A",    "&kp S",    "&kp D",    "&kp F",       "&kp G", "&kp RIGHT_BRACKET",           "&mkp LCLK",       "&kp H",  "&kp J",     "&kp K",    "&kp L",             "&kp SEMI",           "&lt 3 SQT",
+       "&kp LSHFT",     "&kp Z",    "&kp X",    "&kp C",    "&kp V",       "&kp B",          "&kp NUHS",           "&mkp RCLK",       "&kp N",  "&kp M", "&kp COMMA",  "&lt 3 DOT", "&mt RIGHT_SHIFT FSLH", "&kp INTERNATIONAL_1",
+       "&mkp LCLK", "&mkp RCLK", "&kp LGUI", "&kp LALT", "&kp BSPC", "&lt 3 ENTER",          "&kp INT5", "&kp INTERNATIONAL_4", "&lt 2 SPACE",  "&none",     "&none", "&kp RGUI",            "&kp EQUAL", "&kp INTERNATIONAL_3"
+    ], [
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans",                     "&trans",    "&trans",    "&trans", "&trans", "&trans", "&trans",
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans",                     "&trans",    "&trans",    "&trans", "&trans", "&trans", "&trans",
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans",    "&trans",    "&trans", "&trans", "&trans", "&trans",
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&mkp LCLK", "&mkp RCLK", "&trans", "&trans", "&trans",
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&mkp LCLK", "&mkp RCLK", "&trans", "&trans", "&trans"
+    ], [
+       "&trans",   "&kp F1",          "&kp F2",  "&kp F3",     "&kp F4", "&kp F5",                             "&kp F6",         "&kp F7",       "&kp F8",          "&kp F9",         "&kp F10", "&trans",
+       "&trans",  "&kp F11",         "&kp F12", "&kp END",     "&trans", "&trans",                     "&kp LEFT_ARROW", "&kp DOWN_ARROW", "&kp UP_ARROW", "&kp RIGHT_ARROW", "&kp PRINTSCREEN", "&trans",
+       "&trans", "&kp HOME", "&kp PRINTSCREEN",  "&trans",     "&trans", "&trans", "&trans", "&trans", "&kp LEFT_ARROW", "&kp DOWN_ARROW", "&kp UP_ARROW", "&kp RIGHT_ARROW",          "&trans", "&trans",
+       "&trans",   "&trans",          "&trans",  "&trans",     "&trans", "&trans", "&trans", "&trans",         "&trans",         "&trans",       "&trans",          "&trans",          "&trans", "&trans",
+       "&trans",   "&trans",          "&trans",  "&trans", "&kp DELETE", "&trans", "&trans", "&trans",         "&trans",         "&trans",       "&trans",          "&trans",          "&trans", "&trans"
+    ], [
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans",                     "&trans",    "&trans",    "&trans", "&trans", "&trans", "&trans",
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans",                     "&trans",    "&trans",    "&trans", "&trans", "&trans", "&trans",
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans",    "&trans",    "&trans", "&trans", "&trans", "&trans",
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&mkp LCLK", "&mkp RCLK", "&trans", "&trans", "&trans",
+       "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&trans", "&mkp LCLK", "&mkp RCLK", "&trans", "&trans", "&trans"
+    ]
+  ]
+}

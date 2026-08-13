@@ -6,3 +6,4 @@ coverage
 pnpm-lock.yaml
 package-lock.json
 src/proto
+src/lib/__tests__/fixtures

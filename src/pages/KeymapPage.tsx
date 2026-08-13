@@ -22,6 +22,7 @@ import {
   IconLock,
   IconRefresh,
   IconTemplate,
+  IconGitCommit,
 } from "@tabler/icons-react";
 import { useStudioLockState } from "@cormoran/zmk-studio-react-hook";
 import * as Tooltip from "@radix-ui/react-tooltip";
@@ -48,6 +49,7 @@ import { VersionDiffModal } from "../components/versionHistory/VersionDiffModal"
 import { useKeymapVersionHistory } from "../hooks/versionHistory/useKeymapVersionHistory";
 import { useIsTabActive } from "../hooks/useIsTabActive";
 import { KeymapPresetDialog } from "../components/KeymapPresetDialog";
+import { ExportFirmwareDialog } from "../components/ExportFirmwareDialog";
 
 export function KeymapPage() {
   const { t } = useLanguage();
@@ -90,6 +92,7 @@ export function KeymapPage() {
   const [showRestoreMenu, setShowRestoreMenu] = useState(false);
   // Built-in keymap preset picker (diff review + staged apply).
   const [showPresetDialog, setShowPresetDialog] = useState(false);
+  const [showExportDialog, setShowExportDialog] = useState(false);
   const [renameValue, setRenameValue] = useState("");
   const [isRenaming, setIsRenaming] = useState(false);
   const renameInputRef = useRef<HTMLInputElement>(null);
@@ -531,6 +534,16 @@ export function KeymapPage() {
             <p className="text-sm text-[var(--color-text-muted)]">
               {t("Connect your keyboard to edit keymaps")}
             </p>
+            {/* The firmware backport needs a live keyboard to read from —
+                shown disabled here so the feature stays discoverable. */}
+            <button
+              className="mt-3 inline-flex items-center gap-1.5 px-2 py-1 rounded border border-[var(--color-border)] text-xs text-[var(--color-text-muted)] disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled
+              title={t("Connect a keyboard to export its settings.")}
+            >
+              <IconGitCommit size={14} />
+              {t("Export to firmware")}
+            </button>
           </div>
         )}
 
@@ -920,6 +933,26 @@ export function KeymapPage() {
                 {t("Presets")}
               </button>
 
+              {/* Firmware backport: commit the on-device state to the
+                  firmware source repo as new compiled-in defaults. */}
+              <button
+                className="flex items-center gap-1.5 px-2 py-1 rounded border border-[var(--color-border)] text-xs text-[var(--color-text-secondary)] hover:text-[var(--color-electric)] hover:border-[var(--color-electric)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={() => setShowExportDialog(true)}
+                disabled={
+                  !connection.isConnected || !keymap.keymap || keymap.isLoading
+                }
+                title={
+                  !connection.isConnected
+                    ? t("Connect a keyboard to export its settings.")
+                    : t(
+                        "Backport the on-device settings into the firmware source repository",
+                      )
+                }
+              >
+                <IconGitCommit size={14} />
+                {t("Export to firmware")}
+              </button>
+
               {inputStream.isEnabled && <BrowserKeyInputOverlay />}
             </div>
 
@@ -1066,6 +1099,13 @@ export function KeymapPage() {
         onOpenChange={setShowPresetDialog}
         keymap={keymap}
         physicalLayout={currentLayout}
+      />
+
+      {/* Firmware backport dialog */}
+      <ExportFirmwareDialog
+        open={showExportDialog}
+        onOpenChange={setShowExportDialog}
+        keymap={keymap}
       />
 
       {/* Rename Layer Dialog */}
