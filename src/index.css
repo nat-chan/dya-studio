@@ -601,3 +601,29 @@
     border-width: 0;
   }
 }
+
+/* react-diff-view: the stock stylesheet is light-only (pastel backgrounds,
+ * inherited text). In the dark theme the app's white text on those pastels
+ * washes out completely, so restyle via the library's CSS variables.
+ * GitHub-dark-like translucent greens/reds keep app text readable. */
+:root .diff {
+  --diff-background-color: transparent;
+  --diff-text-color: var(--color-text);
+  --diff-selection-background-color: rgba(56, 139, 253, 0.35);
+  --diff-code-insert-background-color: rgba(46, 160, 67, 0.2);
+  --diff-gutter-insert-background-color: rgba(46, 160, 67, 0.35);
+  --diff-code-insert-edit-background-color: rgba(46, 160, 67, 0.45);
+  --diff-code-delete-background-color: rgba(248, 81, 73, 0.2);
+  --diff-gutter-delete-background-color: rgba(248, 81, 73, 0.35);
+  --diff-code-delete-edit-background-color: rgba(248, 81, 73, 0.45);
+  --diff-code-selected-background-color: rgba(210, 153, 34, 0.25);
+  --diff-gutter-selected-background-color: rgba(210, 153, 34, 0.25);
+  --diff-omit-gutter-line-color: var(--color-border);
+}
+
+/* Light theme: the same translucent hues over a white surface read like
+ * GitHub's light diff, so one definition serves both themes; only the
+ * selection tint needs to stay darker-on-light. */
+:root.light .diff {
+  --diff-selection-background-color: rgba(56, 139, 253, 0.2);
+}
