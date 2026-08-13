@@ -9,7 +9,10 @@ import { studioLockErrorText } from "../lib/studioUnlock";
 
 export const RUNTIME_ACCEL_SUBSYSTEM_IDENTIFIER = "nat_chan__runtime_accel";
 
-const CODEC = {
+/** ts-proto codec for the runtime-accel Request/Response wire messages.
+ * Exported for other consumers of the subsystem (the firmware-backport
+ * dialog reads both instances' curves through it). */
+export const RUNTIME_ACCEL_CODEC = {
   encode: (request: Request) => Request.encode(request).finish(),
   decode: (payload: Uint8Array) => Response.decode(payload),
 };
@@ -51,7 +54,7 @@ export function useRuntimeAccel(): UseRuntimeAccelReturn {
   // (SECURED) call opens the unlock modal and is retried after unlock.
   const { subsystem, ready, call } = useCustomSubsystem(
     RUNTIME_ACCEL_SUBSYSTEM_IDENTIFIER,
-    CODEC,
+    RUNTIME_ACCEL_CODEC,
   );
   const [instances, setInstances] = useState<string[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);

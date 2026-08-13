@@ -1427,6 +1427,57 @@ const ja: Record<string, string> = {
   "Preset staged: {{applied}} keys changed, {{skipped}} skipped, {{failed}} failed. Use Save to persist or Discard to revert.":
     "プリセットを一時適用しました: {{applied}} キー変更 / {{skipped}} スキップ / {{failed}} 失敗。保存で確定、破棄で元に戻せます。",
   "Apply Preset": "プリセットを適用",
+  // Firmware backport (Export to firmware)
+  "Export to firmware": "ファームウェアに書き出し",
+  "Connect a keyboard to export its settings.":
+    "設定を書き出すにはキーボードを接続してください。",
+  "Backport the on-device settings into the firmware source repository":
+    "実機の設定をファームウェアのソースリポジトリにバックポートします",
+  "Backport the current on-device keymap and acceleration curves into the firmware source repository as new compiled-in defaults. Review the diff, then commit directly to GitHub.":
+    "実機の現在のキーマップと加速カーブを、ファームウェアのソースリポジトリに新しいビルド時デフォルトとしてバックポートします。差分を確認してから GitHub に直接コミットできます。",
+  Repository: "リポジトリ",
+  Branch: "ブランチ",
+  "GitHub token": "GitHub トークン",
+  "Fine-grained personal access token, scoped to {{repo}} only, with permission Contents: Read and write. Stored only in this browser's local storage.":
+    "{{repo}} のみを対象にした fine-grained personal access token (権限: Contents の Read and write) を入力してください。トークンはこのブラウザの local storage にのみ保存されます。",
+  "Reading device state and fetching firmware sources...":
+    "実機の状態を読み取り、ファームウェアのソースを取得しています...",
+  "Acceleration curves could not be read from the keyboard, so the overlay files are not included in this export.":
+    "キーボードから加速カーブを読み取れなかったため、overlay ファイルはこの書き出しに含まれません。",
+  "{{count}} bindings cannot be expressed in the firmware source and are exported as &trans:":
+    "{{count}} 個のキー割り当てはファームウェアソースで表現できないため &trans として書き出されます:",
+  "Layer {{layer}}, key {{position}}: {{binding}}":
+    "レイヤー {{layer}} のキー {{position}}: {{binding}}",
+  Refetch: "再取得",
+  "No changes in this file.": "このファイルに変更はありません。",
+  'Flashing the backported firmware will not visibly change behavior: the settings stored on the keyboard override the compiled-in defaults, and both then hold identical values — which is exactly what makes this backport harmless. To hand control back to the compiled-in defaults later, you can optionally run "Reset all settings" in the Settings tab.':
+    "バックポートしたファームウェアを書き込んでも、見た目の動作は変わりません。キーボードのフラッシュに保存された設定がビルド時デフォルトより優先され、その両方が同じ値になるためです (だからこそこのバックポートは安全です)。あとでビルド時デフォルトに主導権を戻したい場合は、設定タブの「すべての設定をリセット」を任意で実行できます。",
+  "Backport committed.": "バックポートをコミットしました。",
+  "View commit on GitHub": "GitHub でコミットを表示",
+  "GitHub Actions now builds the new firmware automatically — download it from the repository's Actions page once the build finishes.":
+    "GitHub Actions が新しいファームウェアを自動でビルドします。ビルド完了後、リポジトリの Actions ページからダウンロードしてください。",
+  "Commit message": "コミットメッセージ",
+  "Everything is up to date — the firmware defaults already match the current device state.":
+    "すべて最新です — ファームウェアのデフォルトはすでに実機の状態と一致しています。",
+  "Enter a GitHub token to commit.":
+    "コミットするには GitHub トークンを入力してください。",
+  "Commit {{count}} files to {{branch}}":
+    "{{count}} ファイルを {{branch}} にコミット",
+  "GitHub rejected the token. Use a fine-grained personal access token for {{repo}} with Contents: Read and write.":
+    "GitHub がトークンを拒否しました。{{repo}} を対象にした fine-grained personal access token (権限: Contents の Read and write) を使用してください。",
+  "The branch moved while committing (non-fast-forward). Refetch and try again.":
+    "コミット中にブランチが更新されました (non-fast-forward)。再取得してからやり直してください。",
+  "Repository, branch, or file not found. Check the repository and branch names; private repositories also need a token.":
+    "リポジトリ・ブランチ・ファイルが見つかりません。リポジトリ名とブランチ名を確認してください (プライベートリポジトリの場合はトークンも必要です)。",
+  "Network error while talking to GitHub. Check your connection and try again.":
+    "GitHub との通信でネットワークエラーが発生しました。接続を確認してやり直してください。",
+  "GitHub API error: {{message}}": "GitHub API エラー: {{message}}",
+  "The keymap has not been loaded yet.":
+    "キーマップがまだ読み込まれていません。",
+  "The number of keys on the device does not match the firmware keymap file, so the keymap cannot be backported.":
+    "実機のキー数がファームウェアの keymap ファイルと一致しないため、キーマップをバックポートできません。",
+  "The firmware source file has an unexpected format: {{message}}":
+    "ファームウェアのソースファイルが想定外の形式です: {{message}}",
 };
 
 const dictionaries: Record<Language, Record<string, string>> = {

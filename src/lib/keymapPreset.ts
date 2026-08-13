@@ -17,7 +17,12 @@ import type {
 } from "@zmkfirmware/zmk-studio-ts-client/keymap";
 import type { BehaviorDefinition } from "../hooks/useKeymapSource";
 import { getBehaviorMetadata } from "./behaviorMetadata";
-import { HID_USAGE_PAGE_KEYBOARD, createHidUsage } from "./keycodes";
+import {
+  HID_USAGE_PAGE_KEYBOARD,
+  createHidUsage,
+  getHidUsageCode,
+  getHidUsagePage,
+} from "./keycodes";
 
 // ---------------------------------------------------------------------------
 // Preset definition
@@ -42,164 +47,152 @@ export interface KeymapPresetDefinition {
 }
 
 // ---------------------------------------------------------------------------
-// ZMK keycode names -> HID usage (keyboard page)
+// ZMK keycode names <-> HID usage (keyboard page)
 // ---------------------------------------------------------------------------
 
 /**
- * Canonical ZMK keycode names and aliases -> HID keyboard-page usage code.
- * Subset of zmk/include/dt-bindings/zmk/keys.h sufficient for bundled
- * presets; extend as presets need more codes.
+ * One keycode: HID keyboard-page usage code plus its ZMK names, CANONICAL
+ * name first. This list is the single source of truth for BOTH directions:
+ * every listed name parses (name -> usage), and the canonical name is what
+ * serialization emits (usage -> name), so a parse -> serialize round trip is
+ * the identity on canonical spellings.
+ *
+ * Canonical spellings deliberately match the ones used in
+ * nat-chan/zmk-keyboard-torabo-tsuki-lp's config/keymap.json (SEMI over
+ * SEMICOLON, INTERNATIONAL_1 over INT1 but INT5 over INTERNATIONAL_5, ...) so
+ * the firmware-backport export reproduces that repo's keymap verbatim; the
+ * round trip over the bundled preset is unit-tested.
  */
-const ZMK_KEYCODES: Record<string, number> = {
+type ZmkKeycodeDef = readonly [code: number, ...names: string[]];
+
+const ZMK_KEYCODE_DEFS: readonly ZmkKeycodeDef[] = [
   // Letters
-  ...Object.fromEntries(
-    Array.from({ length: 26 }, (_, i) => [
-      String.fromCharCode(65 + i),
-      0x04 + i,
-    ]),
+  ...Array.from(
+    { length: 26 },
+    (_, i) => [0x04 + i, String.fromCharCode(65 + i)] as const,
   ),
   // Numbers (N1..N9, N0)
-  ...Object.fromEntries(
-    Array.from({ length: 9 }, (_, i) => [`N${i + 1}`, 0x1e + i]),
+  ...Array.from(
+    { length: 9 },
+    (_, i) => [0x1e + i, `N${i + 1}`, `NUMBER_${i + 1}`] as const,
   ),
-  N0: 0x27,
-  NUMBER_1: 0x1e,
-  NUMBER_2: 0x1f,
-  NUMBER_3: 0x20,
-  NUMBER_4: 0x21,
-  NUMBER_5: 0x22,
-  NUMBER_6: 0x23,
-  NUMBER_7: 0x24,
-  NUMBER_8: 0x25,
-  NUMBER_9: 0x26,
-  NUMBER_0: 0x27,
+  [0x27, "N0", "NUMBER_0"],
   // Control / whitespace
-  ENTER: 0x28,
-  RET: 0x28,
-  RETURN: 0x28,
-  ESC: 0x29,
-  ESCAPE: 0x29,
-  BSPC: 0x2a,
-  BACKSPACE: 0x2a,
-  TAB: 0x2b,
-  SPACE: 0x2c,
+  [0x28, "ENTER", "RET", "RETURN"],
+  [0x29, "ESC", "ESCAPE"],
+  [0x2a, "BSPC", "BACKSPACE"],
+  [0x2b, "TAB"],
+  [0x2c, "SPACE"],
   // Punctuation
-  MINUS: 0x2d,
-  EQUAL: 0x2e,
-  LBKT: 0x2f,
-  LEFT_BRACKET: 0x2f,
-  RBKT: 0x30,
-  RIGHT_BRACKET: 0x30,
-  BSLH: 0x31,
-  BACKSLASH: 0x31,
-  NUHS: 0x32,
-  NON_US_HASH: 0x32,
-  SEMI: 0x33,
-  SEMICOLON: 0x33,
-  SQT: 0x34,
-  SINGLE_QUOTE: 0x34,
-  APOS: 0x34,
-  APOSTROPHE: 0x34,
-  GRAVE: 0x35,
-  COMMA: 0x36,
-  DOT: 0x37,
-  PERIOD: 0x37,
-  FSLH: 0x38,
-  SLASH: 0x38,
-  CAPS: 0x39,
-  CAPSLOCK: 0x39,
-  CLCK: 0x39,
+  [0x2d, "MINUS"],
+  [0x2e, "EQUAL"],
+  [0x2f, "LEFT_BRACKET", "LBKT"],
+  [0x30, "RIGHT_BRACKET", "RBKT"],
+  [0x31, "BSLH", "BACKSLASH"],
+  [0x32, "NUHS", "NON_US_HASH"],
+  [0x33, "SEMI", "SEMICOLON"],
+  [0x34, "SQT", "SINGLE_QUOTE", "APOS", "APOSTROPHE"],
+  [0x35, "GRAVE"],
+  [0x36, "COMMA"],
+  [0x37, "DOT", "PERIOD"],
+  [0x38, "FSLH", "SLASH"],
+  [0x39, "CAPS", "CAPSLOCK", "CLCK"],
   // Function keys
-  ...Object.fromEntries(
-    Array.from({ length: 12 }, (_, i) => [`F${i + 1}`, 0x3a + i]),
-  ),
+  ...Array.from({ length: 12 }, (_, i) => [0x3a + i, `F${i + 1}`] as const),
   // Navigation
-  PSCRN: 0x46,
-  PRINTSCREEN: 0x46,
-  SLCK: 0x47,
-  SCROLLLOCK: 0x47,
-  PAUSE_BREAK: 0x48,
-  INS: 0x49,
-  INSERT: 0x49,
-  HOME: 0x4a,
-  PG_UP: 0x4b,
-  PAGE_UP: 0x4b,
-  DEL: 0x4c,
-  DELETE: 0x4c,
-  END: 0x4d,
-  PG_DN: 0x4e,
-  PAGE_DOWN: 0x4e,
-  RIGHT: 0x4f,
-  RIGHT_ARROW: 0x4f,
-  LEFT: 0x50,
-  LEFT_ARROW: 0x50,
-  DOWN: 0x51,
-  DOWN_ARROW: 0x51,
-  UP: 0x52,
-  UP_ARROW: 0x52,
+  [0x46, "PRINTSCREEN", "PSCRN"],
+  [0x47, "SLCK", "SCROLLLOCK"],
+  [0x48, "PAUSE_BREAK"],
+  [0x49, "INS", "INSERT"],
+  [0x4a, "HOME"],
+  [0x4b, "PG_UP", "PAGE_UP"],
+  [0x4c, "DELETE", "DEL"],
+  [0x4d, "END"],
+  [0x4e, "PG_DN", "PAGE_DOWN"],
+  [0x4f, "RIGHT_ARROW", "RIGHT"],
+  [0x50, "LEFT_ARROW", "LEFT"],
+  [0x51, "DOWN_ARROW", "DOWN"],
+  [0x52, "UP_ARROW", "UP"],
   // Non-US / international
-  NON_US_BSLH: 0x64,
-  NON_US_BACKSLASH: 0x64,
-  NUBS: 0x64,
-  INT1: 0x87,
-  INTERNATIONAL_1: 0x87,
-  INT_RO: 0x87,
-  INT2: 0x88,
-  INTERNATIONAL_2: 0x88,
-  INT_KANA: 0x88,
-  INT3: 0x89,
-  INTERNATIONAL_3: 0x89,
-  INT_YEN: 0x89,
-  INT4: 0x8a,
-  INTERNATIONAL_4: 0x8a,
-  INT_HENKAN: 0x8a,
-  INT5: 0x8b,
-  INTERNATIONAL_5: 0x8b,
-  INT_MUHENKAN: 0x8b,
-  LANG1: 0x90,
-  LANG2: 0x91,
+  [0x64, "NON_US_BSLH", "NON_US_BACKSLASH", "NUBS"],
+  [0x87, "INTERNATIONAL_1", "INT1", "INT_RO"],
+  [0x88, "INTERNATIONAL_2", "INT2", "INT_KANA"],
+  [0x89, "INTERNATIONAL_3", "INT3", "INT_YEN"],
+  [0x8a, "INTERNATIONAL_4", "INT4", "INT_HENKAN"],
+  [0x8b, "INT5", "INTERNATIONAL_5", "INT_MUHENKAN"],
+  [0x90, "LANG1"],
+  [0x91, "LANG2"],
   // Modifiers
-  LCTRL: 0xe0,
-  LEFT_CONTROL: 0xe0,
-  LSHFT: 0xe1,
-  LSHIFT: 0xe1,
-  LEFT_SHIFT: 0xe1,
-  LALT: 0xe2,
-  LEFT_ALT: 0xe2,
-  LGUI: 0xe3,
-  LEFT_GUI: 0xe3,
-  LWIN: 0xe3,
-  LCMD: 0xe3,
-  RCTRL: 0xe4,
-  RIGHT_CONTROL: 0xe4,
-  RSHFT: 0xe5,
-  RSHIFT: 0xe5,
-  RIGHT_SHIFT: 0xe5,
-  RALT: 0xe6,
-  RIGHT_ALT: 0xe6,
-  RGUI: 0xe7,
-  RIGHT_GUI: 0xe7,
-  RWIN: 0xe7,
-  RCMD: 0xe7,
-};
+  [0xe0, "LCTRL", "LEFT_CONTROL"],
+  [0xe1, "LSHFT", "LSHIFT", "LEFT_SHIFT"],
+  [0xe2, "LALT", "LEFT_ALT"],
+  [0xe3, "LGUI", "LEFT_GUI", "LWIN", "LCMD"],
+  [0xe4, "RCTRL", "RIGHT_CONTROL"],
+  [0xe5, "RIGHT_SHIFT", "RSHFT", "RSHIFT"],
+  [0xe6, "RALT", "RIGHT_ALT"],
+  [0xe7, "RGUI", "RIGHT_GUI", "RWIN", "RCMD"],
+];
 
-/** ZMK mouse button names -> `&mkp` param bitmask values. */
-const ZMK_MOUSE_BUTTONS: Record<string, number> = {
-  LCLK: 1,
-  MB1: 1,
-  RCLK: 2,
-  MB2: 2,
-  MCLK: 4,
-  MB3: 4,
-  MB4: 8,
-  MB5: 16,
-};
+/** Every ZMK keycode name (canonical + aliases) -> HID keyboard-page code. */
+const ZMK_KEYCODES: Record<string, number> = Object.fromEntries(
+  ZMK_KEYCODE_DEFS.flatMap(([code, ...names]) =>
+    names.map((name) => [name, code]),
+  ),
+);
+
+/** HID keyboard-page code -> canonical ZMK keycode name. */
+const ZMK_KEYCODE_CANONICAL_NAMES = new Map<number, string>(
+  ZMK_KEYCODE_DEFS.map(([code, ...names]) => [code, names[0]]),
+);
+
+/**
+ * ZMK mouse button: `&mkp` param bitmask value plus its names, canonical name
+ * first. Single source of truth for both directions, like
+ * {@link ZMK_KEYCODE_DEFS}.
+ */
+const ZMK_MOUSE_BUTTON_DEFS: readonly ZmkKeycodeDef[] = [
+  [1, "LCLK", "MB1"],
+  [2, "RCLK", "MB2"],
+  [4, "MCLK", "MB3"],
+  [8, "MB4"],
+  [16, "MB5"],
+];
+
+/** Every ZMK mouse button name -> `&mkp` param bitmask value. */
+const ZMK_MOUSE_BUTTONS: Record<string, number> = Object.fromEntries(
+  ZMK_MOUSE_BUTTON_DEFS.flatMap(([mask, ...names]) =>
+    names.map((name) => [name, mask]),
+  ),
+);
+
+/** `&mkp` param bitmask value -> canonical ZMK mouse button name. */
+const ZMK_MOUSE_BUTTON_CANONICAL_NAMES = new Map<number, string>(
+  ZMK_MOUSE_BUTTON_DEFS.map(([mask, ...names]) => [mask, names[0]]),
+);
 
 /** Resolve a ZMK keycode name to a full HID usage (page << 16 | code). */
 export function zmkKeycodeToUsage(name: string): number | null {
   const code = ZMK_KEYCODES[name.toUpperCase()];
   if (code === undefined) return null;
   return createHidUsage(HID_USAGE_PAGE_KEYBOARD, code);
+}
+
+/**
+ * Resolve a full HID usage back to its canonical ZMK keycode name. Returns
+ * null for non-keyboard pages, usages carrying implicit-modifier bits (bits
+ * 24+, e.g. LS(...)-wrapped codes), and codes the table doesn't cover.
+ */
+export function usageToZmkKeycode(usage: number): string | null {
+  // Implicit-modifier bits have no plain-name spelling.
+  if (usage >>> 24 !== 0) return null;
+  if (getHidUsagePage(usage) !== HID_USAGE_PAGE_KEYBOARD) return null;
+  return ZMK_KEYCODE_CANONICAL_NAMES.get(getHidUsageCode(usage)) ?? null;
+}
+
+/** Resolve an `&mkp` param bitmask back to its canonical ZMK button name.
+ * Returns null for combined masks and unknown values. */
+export function mouseButtonsToZmkName(buttons: number): string | null {
+  return ZMK_MOUSE_BUTTON_CANONICAL_NAMES.get(buttons) ?? null;
 }
 
 // ---------------------------------------------------------------------------
@@ -255,6 +248,39 @@ export function parseZmkBinding(text: string): ParsedBinding | null {
     }
     default:
       return null;
+  }
+}
+
+/**
+ * Serialize a parsed binding back to its devicetree-style string, using
+ * canonical keycode names. The exact inverse of {@link parseZmkBinding} on
+ * canonical spellings (round-trip tested over the bundled preset). Returns
+ * null when a usage has no plain ZMK name (non-keyboard page, implicit
+ * modifiers, combined mouse-button masks).
+ */
+export function serializeZmkBinding(parsed: ParsedBinding): string | null {
+  switch (parsed.type) {
+    case "trans":
+      return "&trans";
+    case "none":
+      return "&none";
+    case "kp": {
+      const name = usageToZmkKeycode(parsed.usage);
+      return name === null ? null : `&kp ${name}`;
+    }
+    case "lt": {
+      const name = usageToZmkKeycode(parsed.usage);
+      return name === null ? null : `&lt ${parsed.layerIndex} ${name}`;
+    }
+    case "mt": {
+      const mod = usageToZmkKeycode(parsed.modUsage);
+      const name = usageToZmkKeycode(parsed.usage);
+      return mod === null || name === null ? null : `&mt ${mod} ${name}`;
+    }
+    case "mkp": {
+      const name = mouseButtonsToZmkName(parsed.buttons);
+      return name === null ? null : `&mkp ${name}`;
+    }
   }
 }
 
