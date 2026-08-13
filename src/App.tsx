@@ -50,6 +50,7 @@ import { useUrlTab, pathnameFromTabId } from "./hooks/useUrlTab";
 import { useDevtool } from "./hooks/useDevtool";
 import { DevtoolWindow } from "./components/DevtoolWindow";
 import { trackPageView } from "./lib/analytics";
+import { appPathname, toUrlPath } from "./lib/basePath";
 import { DeveloperGuidePage } from "./components/developerGuide";
 import {
   DEVELOPER_GUIDE_PATH,
@@ -156,10 +157,10 @@ function App() {
  */
 function AppRouter() {
   const { language } = useLanguage();
-  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const [pathname, setPathname] = useState(() => appPathname());
 
   useEffect(() => {
-    const onPopState = () => setPathname(window.location.pathname);
+    const onPopState = () => setPathname(appPathname());
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
@@ -205,15 +206,16 @@ function AppContent() {
 
   // The release notes page is a standalone, connection-independent route so it
   // stays reachable from the splash screen and via GitHub Release deep links.
-  const [pathname, setPathname] = useState(() => window.location.pathname);
+  const [pathname, setPathname] = useState(() => appPathname());
   useEffect(() => {
-    const onPopState = () => setPathname(window.location.pathname);
+    const onPopState = () => setPathname(appPathname());
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
   }, []);
   const navigatePath = useCallback((path: string) => {
-    if (window.location.pathname !== path) {
-      window.history.pushState(null, "", path);
+    const urlPath = toUrlPath(path);
+    if (window.location.pathname !== urlPath) {
+      window.history.pushState(null, "", urlPath);
     }
     // Notify both this route state and useUrlTab's own popstate listener.
     window.dispatchEvent(new PopStateEvent("popstate"));
@@ -221,7 +223,7 @@ function AppContent() {
   // Same as navigatePath but without a history entry, so Back never returns to
   // a URL carrying a spent OAuth authorization code.
   const replacePath = useCallback((path: string) => {
-    window.history.replaceState(null, "", path);
+    window.history.replaceState(null, "", toUrlPath(path));
     window.dispatchEvent(new PopStateEvent("popstate"));
   }, []);
   const onReleaseNotes = pathname === RELEASE_NOTES_PATH;
@@ -236,9 +238,9 @@ function AppContent() {
       !onReleaseNotes &&
       !onOauthCallback &&
       urlTab !== activeTab &&
-      window.location.pathname !== "/"
+      appPathname() !== "/"
     ) {
-      window.history.replaceState(null, "", "/");
+      window.history.replaceState(null, "", toUrlPath("/"));
     }
   }, [urlTab, activeTab, onReleaseNotes, onOauthCallback]);
 

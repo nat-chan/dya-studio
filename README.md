@@ -23,6 +23,15 @@
   <img src="docs/images/keymap.png" alt="DYA Studio keymap editor" width="800" />
 </p>
 
+> [!NOTE]
+> この fork ([nat-chan/dya-studio](https://github.com/nat-chan/dya-studio)) は [cormoran/dya-studio](https://github.com/cormoran/dya-studio) を元にした nat-chan による改造版です。主な追加機能:
+>
+> - **Acceleration タブ** — [zmk-module-runtime-accel](https://github.com/nat-chan/zmk-module-runtime-accel) (`nat_chan__runtime_accel` カスタム Studio RPC サブシステム) のポインタ/スクロール加速度カーブをリアルタイム編集
+> - **JIS 凡例の拡充** — キーマップエディタの OS Layout (US/JIS) 切り替え用 JIS 表示の追加マッピング
+> - **キーマッププリセット** — 内蔵プリセット (Keyball 風 とらぼつき LP 配列) を現在のキーマップとの差分表示付きで適用
+>
+> この fork は GitHub Pages (<https://nat-chan.github.io/dya-studio/>) にデプロイされます。ライセンスは上流と同じ AGPL-3.0 です。
+
 ## Getting Started
 
 1. Open [studio.dya.cormoran.works](https://studio.dya.cormoran.works) in a supported browser (see below).

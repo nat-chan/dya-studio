@@ -55,3 +55,17 @@ export const ABYSS_CLIENT_ID: string =
  */
 export const ABYSS_BASE_URL: string =
   (import.meta.env.VITE_ABYSS_BASE_URL as string | undefined) || "";
+
+/**
+ * URL prefix the app is served under, without a trailing slash; `""` for a
+ * root deployment. Comes from Vite's `base` option (`VITE_BASE` at build
+ * time) — e.g. `"/dya-studio"` for the GitHub Pages deployment at
+ * https://nat-chan.github.io/dya-studio/. Use {@link ../lib/basePath}'s
+ * helpers instead of reading this directly when translating between app
+ * routes and browser URLs.
+ */
+export const BASE_PATH: string = (() => {
+  const base = (import.meta.env.BASE_URL as string | undefined) || "/";
+  const trimmed = base.replace(/\/+$/, "");
+  return trimmed === "" || trimmed === "/" ? "" : trimmed;
+})();
