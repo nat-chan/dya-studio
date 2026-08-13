@@ -1401,6 +1401,8 @@ const ja: Record<string, string> = {
   "Save to Flash": "フラッシュに保存",
   "Applied (RAM only)": "適用しました (RAM のみ)",
   "Saved to flash": "フラッシュに保存しました",
+  "Drag points · click the line to add · double-click removes · arrow keys nudge a focused point (Shift ×10) · Delete removes · hold Shift while dragging for fine control":
+    "ポイントはドラッグで移動 · 線をクリックで追加 · ダブルクリックで削除 · フォーカス中は矢印キーで微調整 (Shift で ×10) · Delete で削除 · ドラッグ中に Shift で微動",
   "Factor is permille: 1000 = 1.0x. Speed is counts/sec. The firmware clamps factors to {{min}}..{{max}} and sorts points by speed on apply. Drag points on the chart, or double-click a point to remove it.":
     "倍率はパーミル表記です (1000 = 1.0倍)。速度は counts/sec。ファームウェアは適用時に倍率を {{min}}..{{max}} に制限し、ポイントを速度順にソートします。グラフ上のポイントはドラッグで移動、ダブルクリックで削除できます。",
 

@@ -1,4 +1,9 @@
-import { IconChartLine, IconPlus, IconRefresh } from "@tabler/icons-react";
+import {
+  IconArrowBackUp,
+  IconChartLine,
+  IconPlus,
+  IconRefresh,
+} from "@tabler/icons-react";
 
 import { AccelCurveEditor } from "../components/AccelCurveEditor";
 import { LoadingIndicator } from "../components/LoadingIndicator";
@@ -10,6 +15,8 @@ import {
   FACTOR_MAX,
   MAX_POINTS,
   SPEED_MAX,
+  insertIndexBySpeed,
+  largestGapPoint,
 } from "../lib/accelCurve";
 
 /**
@@ -24,6 +31,8 @@ export function AccelerationPage() {
     instances,
     selectedId,
     pairs,
+    loadedPairs,
+    isDirty,
     isLoading,
     isBusy,
     error,
@@ -31,6 +40,7 @@ export function AccelerationPage() {
     refresh,
     selectInstance,
     editPairs,
+    revert,
     setCurve,
   } = useRuntimeAccel();
 
@@ -43,11 +53,16 @@ export function AccelerationPage() {
   const addPoint = () => {
     editPairs((prev) => {
       if (prev.length >= MAX_POINTS) return prev;
+      // Insert at the midpoint of the largest speed gap so the new point
+      // lands on the curve where there is room to shape it.
       const last = prev[prev.length - 1];
-      const next: CurvePoint = last
-        ? { speed: last.speed + 500, factor: last.factor }
-        : { speed: 0, factor: 1000 };
-      return [...prev, next];
+      const next: CurvePoint =
+        largestGapPoint(prev) ??
+        (last
+          ? { speed: last.speed + 500, factor: last.factor }
+          : { speed: 0, factor: 1000 });
+      const index = insertIndexBySpeed(prev, next.speed);
+      return [...prev.slice(0, index), next, ...prev.slice(index)];
     });
   };
 
@@ -148,7 +163,13 @@ export function AccelerationPage() {
                 pairs={pairs}
                 onChange={(next) => editPairs(() => next)}
                 ariaLabel={t("Acceleration curve")}
+                ghostPairs={isDirty ? loadedPairs : null}
               />
+              <p className="text-xs text-[var(--color-text-muted)] mt-1">
+                {t(
+                  "Drag points · click the line to add · double-click removes · arrow keys nudge a focused point (Shift ×10) · Delete removes · hold Shift while dragging for fine control",
+                )}
+              </p>
 
               {/* Point list */}
               <div className="space-y-2 mt-4">
@@ -212,15 +233,27 @@ export function AccelerationPage() {
                   {t("Add Point")}
                 </button>
                 <button
+                  className="btn-ghost flex items-center gap-1 text-sm"
+                  disabled={!isDirty || isBusy}
+                  onClick={revert}
+                >
+                  <IconArrowBackUp size={16} />
+                  {t("Revert")}
+                </button>
+                <button
                   className="btn-neon text-sm"
-                  disabled={isBusy || pairs.length === 0}
+                  disabled={isBusy || pairs.length === 0 || !isDirty}
                   onClick={() => void setCurve(false)}
                 >
                   {isBusy ? t("Applying...") : t("Apply (RAM)")}
                 </button>
                 <button
                   className="btn-electric text-sm"
-                  disabled={isBusy || pairs.length === 0}
+                  disabled={
+                    isBusy ||
+                    pairs.length === 0 ||
+                    (!isDirty && lastAction !== "applied")
+                  }
                   onClick={() => void setCurve(true)}
                 >
                   {t("Save to Flash")}

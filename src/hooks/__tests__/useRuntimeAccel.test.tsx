@@ -171,6 +171,50 @@ describe("useRuntimeAccel", () => {
     expect(result.current.lastAction).toBe("saved");
   });
 
+  it("tracks the loaded curve, dirty state, and revert", async () => {
+    mockFirmware({ pointer: [0, 1000, 1000, 3000] });
+    const { result } = renderHook(() => useRuntimeAccel(), {
+      wrapper: createWrapper(),
+    });
+    await waitFor(() => {
+      expect(result.current.pairs.length).toBe(2);
+    });
+    expect(result.current.isDirty).toBe(false);
+    expect(result.current.loadedPairs).toEqual(result.current.pairs);
+
+    act(() => {
+      result.current.editPairs((prev) => [
+        prev[0],
+        { speed: 2000, factor: 3500 },
+      ]);
+    });
+    expect(result.current.isDirty).toBe(true);
+    // The ghost baseline is untouched by local edits.
+    expect(result.current.loadedPairs).toEqual([
+      { speed: 0, factor: 1000 },
+      { speed: 1000, factor: 3000 },
+    ]);
+
+    act(() => {
+      result.current.revert();
+    });
+    expect(result.current.isDirty).toBe(false);
+    expect(result.current.pairs).toEqual([
+      { speed: 0, factor: 1000 },
+      { speed: 1000, factor: 3000 },
+    ]);
+
+    // Applying resets the baseline to the firmware's sanitized curve.
+    act(() => {
+      result.current.editPairs(() => [{ speed: 0, factor: 25000 }]);
+    });
+    await act(async () => {
+      await result.current.setCurve(false);
+    });
+    expect(result.current.pairs).toEqual([{ speed: 0, factor: 20000 }]);
+    expect(result.current.isDirty).toBe(false);
+  });
+
   it("surfaces firmware errors", async () => {
     mockFirmware({});
     const { result } = renderHook(() => useRuntimeAccel(), {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useCustomSubsystem } from "./useCustomSubsystem";
 import {
   Request,
@@ -22,6 +22,10 @@ export interface UseRuntimeAccelReturn {
   selectedId: string | null;
   /** Working copy of the selected instance's curve control points. */
   pairs: CurvePoint[];
+  /** Curve as last loaded from the firmware (post-sanitize), or null. */
+  loadedPairs: CurvePoint[] | null;
+  /** The working copy differs from the last loaded/applied curve. */
+  isDirty: boolean;
   isLoading: boolean;
   isBusy: boolean;
   error: string | null;
@@ -31,6 +35,8 @@ export interface UseRuntimeAccelReturn {
   selectInstance: (id: string) => Promise<void>;
   /** Replace the working curve locally (drag/type/add/remove point). */
   editPairs: (updater: (prev: CurvePoint[]) => CurvePoint[]) => void;
+  /** Discard local edits: restore the last loaded/applied curve. */
+  revert: () => void;
   /**
    * Send the working curve to the firmware. persist=false stages it in RAM
    * only; persist=true also saves it to flash. The firmware sanitizes
@@ -50,6 +56,7 @@ export function useRuntimeAccel(): UseRuntimeAccelReturn {
   const [instances, setInstances] = useState<string[] | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [pairs, setPairs] = useState<CurvePoint[]>([]);
+  const [loadedPairs, setLoadedPairs] = useState<CurvePoint[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,7 +97,9 @@ export function useRuntimeAccel(): UseRuntimeAccelReturn {
       const token = ++curveLoadTokenRef.current;
       const resp = await runCall(Request.create({ getCurve: { instanceId } }));
       if (resp?.curve && token === curveLoadTokenRef.current) {
-        setPairs(toPairs(resp.curve.points));
+        const loaded = toPairs(resp.curve.points);
+        setPairs(loaded);
+        setLoadedPairs(loaded);
       }
     },
     [runCall],
@@ -134,6 +143,18 @@ export function useRuntimeAccel(): UseRuntimeAccelReturn {
     [],
   );
 
+  const revert = useCallback(() => {
+    if (!loadedPairs) return;
+    curveLoadTokenRef.current++;
+    setLastAction(null);
+    setPairs(loadedPairs);
+  }, [loadedPairs]);
+
+  const isDirty = useMemo(
+    () => JSON.stringify(pairs) !== JSON.stringify(loadedPairs ?? []),
+    [pairs, loadedPairs],
+  );
+
   const setCurve = useCallback(
     async (persist: boolean) => {
       if (!selectedId) return;
@@ -175,6 +196,8 @@ export function useRuntimeAccel(): UseRuntimeAccelReturn {
     instances,
     selectedId,
     pairs,
+    loadedPairs,
+    isDirty,
     isLoading,
     isBusy,
     error,
@@ -182,6 +205,7 @@ export function useRuntimeAccel(): UseRuntimeAccelReturn {
     refresh,
     selectInstance,
     editPairs,
+    revert,
     setCurve,
   };
 }
